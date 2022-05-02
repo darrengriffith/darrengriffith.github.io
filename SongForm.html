@@ -1,10 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Song Form</title>
+
+    <style>
+        body {
+            height: 100vh;
+            width: 100vw;
+            background-color: black;
+            padding: 5vw;
+        }
+        .title {
+            color: yellow;
+            margin: 20px;
+            font-size: 5em;
+        }
+        .line {
+            margin: 20px;
+            font-size: 5em;
+        }
+        .smline {
+            margin: 20px;
+            font-size: 3em;
+        }
+        .label {
+            color: grey;
+            display: inline-block;
+            width: 30vw;
+        }
+        .value {
+            color: white;
+            font-weight: bold;
+            display: inline-block;
+            width: 60vw;
+        }
+    </style>
 </head>
-<body>
-$END$
+
+<body onload="start()">
+    <div class="title" id="songTitle"></div>
+    <div class="line">
+        <div class="label">Beat:</div>
+        <div class="value" id="beat"></div>
+    </div>
+    <div class="line">
+        <div class="label">Measure:</div>
+        <div class="value" id="measure"></div>
+    </div>
+    <div class="line">
+        <div class="label">Section:</div>
+        <div class="value" id="section"></div>
+    </div>
+    <div class="line">
+        <div class="label">Pass:</div>
+        <div class="value" id="pass"></div>
+    </div>
+    <br>
+    <div class="smline">
+        <div class="label">Form:</div>
+        <div class="value" id="songForm"></div>
+    </div>
+    <div class="smline">
+        <div class="label">Passes:</div>
+        <div class="value" id="songPasses"></div>
+    </div>
+
+    <script>
+        let songTitle = "Take the A Train"
+        let bpm = 80;
+        let beatsPerMeasure = 4;
+
+        let sections = [
+            {
+                name: "A",
+                measures: 8
+            },
+            {
+                name: "A",
+                measures: 8
+            },
+            {
+                name: "B",
+                measures: 8
+            },
+            {
+                name: "A",
+                measures: 8
+            },
+        ];
+
+        let passes = ["Vocals", "Saxophone", "Bass", "Guitar", "Vocals"];
+
+        let beat = 1;
+        let measure = 1;
+        let currentSection = 0;
+        let currentPass = 0;
+
+        function start() {
+            let songForm = ""
+            sections.forEach(s => songForm += `${s.name} `);
+            songForm += `  (${bpm} BPM)`;
+
+            let songPasses = "";
+            passes.forEach(p => songPasses += ` ${p} `);
+
+            document.querySelector('#songTitle').textContent = songTitle;
+            document.querySelector('#songForm').textContent = songForm;
+            document.querySelector('#songPasses').textContent = songPasses;
+
+            render();
+
+            setInterval(() => {
+                beat++;
+
+                if(beat > beatsPerMeasure) {
+                    beat = 1;
+                    measure ++;
+                }
+
+                if(measure > sections[currentSection].measures) {
+                    currentSection++;
+                    measure = 1;
+                }
+
+                if(currentSection > sections.length) {
+                    currentPass++;
+                    currentSection = 0;
+                }
+
+                render();
+            }, 60000 / bpm);
+        }
+
+        function initialize() {
+
+        }
+
+        function render() {
+            document.querySelector('#beat').textContent = beat;
+            document.querySelector('#measure').textContent = measure;
+            document.querySelector('#section').textContent = `${sections[currentSection].name} (${currentSection + 1})`;
+            document.querySelector('#pass').textContent = passes[currentPass];
+        }
+    </script>
 </body>
+
 </html>
