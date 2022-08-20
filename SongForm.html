@@ -35,13 +35,29 @@
             display: inline-block;
             width: 60vw;
         }
+        .selectedSection {
+            display: inline-block;
+            color: yellow;
+            font-weight: bold;
+            font-size: 1.5em;
+            margin: .25em;
+        }
+        .notSelectedSection {
+            display: inline-block;
+            color: white;
+            font-size: 1em;
+            margin: .25em;
+        }
+        #bpm {
+            font-size: .4em;
+        }
     </style>
 </head>
 
 <body onload="start()">
     <div class="title" id="songTitle"></div>
     <div class="line">
-        <div class="label">Beat:</div>
+        <div class="label">Beat <span id="bpm"></span>:</div>
         <div class="value" id="beat"></div>
     </div>
     <div class="line">
@@ -58,49 +74,81 @@
     </div>
     <br>
     <div class="smline">
-        <div class="label">Form:</div>
         <div class="value" id="songForm"></div>
     </div>
     <div class="smline">
-        <div class="label">Passes:</div>
         <div class="value" id="songPasses"></div>
     </div>
 
     <script>
-        let songTitle = "Take the A Train"
-        let bpm = 80;
+        let songTitle = "Seven Nation Army"
+        let bpm = 124;
         let beatsPerMeasure = 4;
 
         let sections = [
             {
-                name: "A",
+                name: "Intro",
                 measures: 8
             },
             {
-                name: "A",
-                measures: 8
+                name: "Verse",
+                measures: 16
             },
             {
-                name: "B",
-                measures: 8
+                name: "G/A",
+                measures: 2
             },
             {
-                name: "A",
-                measures: 8
+                name: "Interlude",
+                measures: 16
             },
+            {
+                name: "G/A",
+                measures: 2
+            },
+            {
+                name: "Verse",
+                measures: 16
+            },
+            {
+                name: "G/A",
+                measures: 2
+            },
+            {
+                name: "Interlude",
+                measures: 24
+            },
+            {
+                name: "G/A",
+                measures: 2
+            },
+            {
+                name: "Verse",
+                measures: 16
+            },
+            {
+                name: "G/A",
+                measures: 2
+            },
+            {
+                name: "Interlude",
+                measures: 10
+            }
         ];
 
-        let passes = ["Vocals", "Saxophone", "Bass", "Guitar", "Vocals"];
+        //let passes = ["Vocals", "Saxophone", "Bass", "Guitar", "Vocals"];
+        let passes = [""];
 
         let beat = 1;
-        let measure = 1;
+        let measure = sections[0].measures;
         let currentSection = 0;
         let currentPass = 0;
 
         function start() {
             let songForm = ""
-            sections.forEach(s => songForm += `${s.name} `);
-            songForm += `  (${bpm} BPM)`;
+            sections.forEach(s => {
+                songForm += `[${s.name}] `
+            });
 
             let songPasses = "";
             passes.forEach(p => songPasses += ` ${p} `);
@@ -108,6 +156,7 @@
             document.querySelector('#songTitle').textContent = songTitle;
             document.querySelector('#songForm').textContent = songForm;
             document.querySelector('#songPasses').textContent = songPasses;
+            document.querySelector('#bpm').textContent = `(${bpm} BMP)`;
 
             render();
 
@@ -116,18 +165,28 @@
 
                 if(beat > beatsPerMeasure) {
                     beat = 1;
-                    measure ++;
+                    measure --;
                 }
 
-                if(measure > sections[currentSection].measures) {
+                if(measure === 0) {
                     currentSection++;
-                    measure = 1;
+                    measure = sections[currentSection].measures;
                 }
 
                 if(currentSection > sections.length) {
                     currentPass++;
                     currentSection = 0;
                 }
+
+                let songForm = ""
+                sections.forEach((s, i) => {
+                    if(i === currentSection) {
+                        songForm += `<div class="selectedSection">${s.name}</div>`
+                    } else {
+                        songForm += `<div class="notSelectedSection">${s.name}</div>`
+                    }
+                });
+                document.querySelector('#songForm').innerHTML = songForm;
 
                 render();
             }, 60000 / bpm);
