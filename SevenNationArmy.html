@@ -39,17 +39,46 @@
       display: inline-block;
       color: yellow;
       font-weight: bold;
-      font-size: 1.5em;
-      margin: .25em;
+      font-size: 1em;
+      margin: .15em;
     }
     .notSelectedSection {
       display: inline-block;
       color: white;
-      font-size: 1em;
-      margin: .25em;
+      font-size: .8em;
+      margin: .15em;
+    }
+    .controls {
+      text-align: center;
+      width: 100%;
+      position: fixed;
+      bottom: 0;
+      padding: 1em;
+      z-index: 1000;
     }
     #bpm {
       font-size: .4em;
+    }
+    #start {
+      font-size: 2em;
+      background-color: greenyellow;
+      color: black;
+      margin: 1em;
+      padding: .25em;
+    }
+    #stop {
+      font-size: 2em;
+      background-color: darkred;
+      color: white;
+      margin: 1em;
+      padding: .25em;
+    }
+    #restart {
+      font-size: 2em;
+      background-color: yellow;
+      color: black;
+      margin: 1em;
+      padding: .25em;
     }
   </style>
 </head>
@@ -78,6 +107,11 @@
 </div>
 <div class="smline">
   <div class="value" id="songPasses"></div>
+</div>
+<div class="controls">
+  <button id="start" onclick="startSong()">Start</button>
+  <button id="stop" onclick="stopSong()">Stop</button>
+  <button id="restart" onclick="restartSong()">Restart</button>
 </div>
 
 <script>
@@ -136,6 +170,8 @@
     }
   ];
 
+  sections.unshift({name: "Count In", measures: 1});
+
   //let passes = ["Vocals", "Saxophone", "Bass", "Guitar", "Vocals"];
   let passes = [""];
 
@@ -144,56 +180,78 @@
   let currentSection = 0;
   let currentPass = 0;
 
+  let interval = null;
+
   function start() {
-    let songForm = ""
-    sections.forEach(s => {
-      songForm += `[${s.name}] `
-    });
+    updateSongForm();
 
     let songPasses = "";
     passes.forEach(p => songPasses += ` ${p} `);
 
     document.querySelector('#songTitle').textContent = songTitle;
-    document.querySelector('#songForm').textContent = songForm;
     document.querySelector('#songPasses').textContent = songPasses;
     document.querySelector('#bpm').textContent = `(${bpm} BMP)`;
 
     render();
-
-    setInterval(() => {
-      beat++;
-
-      if(beat > beatsPerMeasure) {
-        beat = 1;
-        measure --;
-      }
-
-      if(measure === 0) {
-        currentSection++;
-        measure = sections[currentSection].measures;
-      }
-
-      if(currentSection > sections.length) {
-        currentPass++;
-        currentSection = 0;
-      }
-
-      let songForm = ""
-      sections.forEach((s, i) => {
-        if(i === currentSection) {
-          songForm += `<div class="selectedSection">${s.name}</div>`
-        } else {
-          songForm += `<div class="notSelectedSection">${s.name}</div>`
-        }
-      });
-      document.querySelector('#songForm').innerHTML = songForm;
-
-      render();
-    }, 60000 / bpm);
   }
 
-  function initialize() {
+  let startSong = () => {
+    if (interval !== null) clearInterval(interval);
+    interval = setInterval(runSong, 60000 / bpm);
+  }
 
+  let stopSong = () => {
+    if (interval !== null) clearInterval(interval);
+  }
+
+  let restartSong = () => {
+    if (interval !== null) clearInterval(interval);
+
+    beat = 1;
+    measure = sections[0].measures;
+    currentSection = 0;
+    currentPass = 0;
+
+    updateSongForm();
+
+    render();
+
+    interval = setInterval(runSong, 60000 / bpm);
+  }
+
+  let updateSongForm = () => {
+    let songForm = ""
+    sections.forEach((s, i) => {
+      if(i === currentSection) {
+        songForm += `<div class="selectedSection">${s.name}</div>`
+      } else {
+        songForm += `<div class="notSelectedSection">${s.name}</div>`
+      }
+    });
+    document.querySelector('#songForm').innerHTML = songForm;
+  }
+
+  let runSong = () => {
+    beat++;
+
+    if(beat > beatsPerMeasure) {
+      beat = 1;
+      measure --;
+    }
+
+    if(measure === 0) {
+      currentSection++;
+      measure = sections[currentSection].measures;
+    }
+
+    if(currentSection > sections.length) {
+      currentPass++;
+      currentSection = 0;
+    }
+
+    updateSongForm();
+
+    render();
   }
 
   function render() {
