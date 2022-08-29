@@ -116,7 +116,7 @@
 
 <script>
   let songTitle = "Seven Nation Army"
-  let bpm = 124;
+  let bpm = 100;
   let beatsPerMeasure = 4;
 
   let sections = [
@@ -133,47 +133,18 @@
       measures: 2
     },
     {
-      name: "Interlude",
-      measures: 16
+      name: "Solo",
+      measures: 8
     },
     {
       name: "G/A",
       measures: 2
-    },
-    {
-      name: "Verse",
-      measures: 16
-    },
-    {
-      name: "G/A",
-      measures: 2
-    },
-    {
-      name: "Interlude",
-      measures: 24
-    },
-    {
-      name: "G/A",
-      measures: 2
-    },
-    {
-      name: "Verse",
-      measures: 16
-    },
-    {
-      name: "G/A",
-      measures: 2
-    },
-    {
-      name: "Interlude",
-      measures: 10
     }
   ];
 
   sections.unshift({name: "Count In", measures: 1});
 
-  //let passes = ["Vocals", "Saxophone", "Bass", "Guitar", "Vocals"];
-  let passes = [""];
+  let passes = ["Verse 1", "Verse 2", "Verse 3"];
 
   let beat = 1;
   let measure = sections[0].measures;
@@ -185,11 +156,7 @@
   function start() {
     updateSongForm();
 
-    let songPasses = "";
-    passes.forEach(p => songPasses += ` ${p} `);
-
     document.querySelector('#songTitle').textContent = songTitle;
-    document.querySelector('#songPasses').textContent = songPasses;
     document.querySelector('#bpm').textContent = `(${bpm} BMP)`;
 
     render();
@@ -229,6 +196,16 @@
       }
     });
     document.querySelector('#songForm').innerHTML = songForm;
+
+    let songPass = "";
+    passes.forEach((s, i) => {
+      if(i === currentPass) {
+        songPass += `<div class="selectedSection">${s}</div>`
+      } else {
+        songPass += `<div class="notSelectedSection">${s}</div>`
+      }
+    });
+    document.querySelector('#songPasses').innerHTML = songPass;
   }
 
   let runSong = () => {
@@ -241,23 +218,30 @@
 
     if(measure === 0) {
       currentSection++;
+
+      if(currentSection === sections.length) {
+        currentPass++;
+        currentSection = 1;
+      }
+
       measure = sections[currentSection].measures;
     }
 
-    if(currentSection > sections.length) {
-      currentPass++;
-      currentSection = 0;
+    if(currentPass === passes.length) {
+      stopSong();
     }
 
     updateSongForm();
 
     render();
+
+    console.log(`${beat} - ${measure} - ${currentSection} - ${currentPass}`);
   }
 
   function render() {
     document.querySelector('#beat').textContent = beat;
     document.querySelector('#measure').textContent = measure;
-    document.querySelector('#section').textContent = `${sections[currentSection].name} (${currentSection + 1})`;
+    document.querySelector('#section').textContent = `${sections[currentSection].name}`;
     document.querySelector('#pass').textContent = passes[currentPass];
   }
 </script>
